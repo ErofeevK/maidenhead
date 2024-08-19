@@ -12,7 +12,7 @@ def test_latlon2maiden(location):
 def test_maiden2latlon(location):
     lat, lon = maidenhead.to_location(location.maiden)
     assert lat == approx(location.latlon[0], rel=0.0001)
-    assert lon == approx(location.latlon[1], rel=0.0001)
+    assert lon == approx(location.latlon[1] if location.latlon[1] <= 180 else location.latlon[1] - 360, rel=0.0001)
 
 
 @pytest.mark.parametrize("invalid", [None, 1, True, False])
