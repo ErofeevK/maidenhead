@@ -7,7 +7,7 @@ toLoc(mloc) takes any string and returns topleft [lat,lon] within mloc
 Beyond 8 characters is not defined for Maidenhead.
 """
 
-from .to_location import to_location
+from .to_location import to_location, to_location_rect, to_geoJSONObject
 from .to_maiden import to_maiden
 
 
