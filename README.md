@@ -55,6 +55,15 @@ takes Maidenhead location string and returns top-left lat, lon of Maidenhead gri
 
 The `center=True` option outputs lat lon of the center of provided maidenhead grid square, instead of the default southwest corner.
 
+
+Maidenhead locator to [geoJSON](https://geojson.org/) ([RFC 7946](https://tools.ietf.org/html/rfc7946))
+
+```python
+geo_obj = mh.to_geoJSONObject('AB01cd', center=True, nosquare=False)
+geoJSON = json.dumps(geo_obj, indent=2)
+```
+
+
 ## Command Line
 
 The command line interface takes either decimal degrees for "latitude longitude" or the Maidenhead locator string:
@@ -78,6 +87,18 @@ python -m maidenhead 65.0 -148.0
 ```
 
 The `--center` option outputs lat lon of the center of provided maidenhead grid square, instead of the default southwest corner.
+
+
+```sh
+python -m maidenhead --center --geojson EN35ld
+```
+
+> {"type": "FeatureCollection", "features": [{"type": "Feature", "properties": {"QTHLocator_Centerpoint": "EN35ld"}, "geometry": {"type": "Point", "coordinates": [-93.04166666666667, 45.145833333333336]}}, {"type": "Feature", "properties": {"QTHLocator": "EN35ld"}, "geometry": {"type": "Polygon", "coordinates": [[[-93.08333333333333, 45.125], [-93.08333333333333, 45.166666666666664], [-93.0, 45.166666666666664], [-93.0, 45.125], [-93.08333333333333, 45.125]]]}}]}
+
+The `--center` option enables adding center point of the grid square as Point feature.
+
+The `--nosquare` option  disables  adding Polygon feature for the requested grid square
+
 
 ## Alternatives
 
