@@ -99,7 +99,7 @@ def to_geoJSONObject(maiden: str, center: bool = True, square: bool = True) -> d
         "properties": {"QTHLocator": maiden},
         "geometry": {
             "type": "Polygon",
-            "coordinates": [[(loc1[1], loc1[0]), (loc1[1], loc2[0]), (loc2[1], loc2[0]), (loc2[1], loc1[0]), (loc1[1], loc1[0])]]
+            "coordinates": [[(loc1[1], loc1[0]), (loc2[1], loc1[0]), (loc2[1], loc2[0]), (loc1[1], loc2[0]), (loc1[1], loc1[0])]]
         }
     }
 
