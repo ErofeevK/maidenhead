@@ -11,7 +11,7 @@ from .to_location import to_location, to_location_rect, to_geoJSONObject
 from .to_maiden import to_maiden
 
 __all__ = ["to_location", "to_maiden", "to_location_rect", "to_geoJSONObject"]
-__version__ = "1.7.0"
+__version__ = "1.8.0"
 
 
 def google_maps(maiden: str, center: bool = False) -> str:

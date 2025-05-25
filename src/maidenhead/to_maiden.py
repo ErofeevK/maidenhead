@@ -3,7 +3,7 @@ import operator
 import functools
 
 
-def to_maiden(lat: float, lon: float = None, precision: int = 3) -> str:
+def to_maiden(lat: float, lon: float, precision: int = 3) -> str:
     """
     Returns a maidenhead string for latitude, longitude at specified level.
 
