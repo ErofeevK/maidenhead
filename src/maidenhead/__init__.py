@@ -10,6 +10,9 @@ Beyond 8 characters is not defined for Maidenhead.
 from .to_location import to_location
 from .to_maiden import to_maiden
 
+__all__ = ["to_location", "to_maiden"]
+__version__ = "1.7.0"
+
 
 def google_maps(maiden: str, center: bool = False) -> str:
     """
