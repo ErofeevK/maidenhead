@@ -33,5 +33,3 @@ profile = "black"
 
 [tool.mypy]
 files = ["src"]
-
-strict_optional = false
