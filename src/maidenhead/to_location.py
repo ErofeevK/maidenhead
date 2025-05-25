@@ -1,4 +1,5 @@
 from __future__ import annotations
+import functools
 
 
 def to_location(maiden: str, center: bool = False) -> tuple[float, float]:
@@ -9,7 +10,7 @@ def to_location(maiden: str, center: bool = False) -> tuple[float, float]:
     ----------
 
     maiden : str
-        Maidenhead grid locator of length 2 to 8
+        Maidenhead grid locator
 
     center : bool
         If true, return the center of provided maidenhead grid square, instead of default south-west corner
@@ -23,43 +24,32 @@ def to_location(maiden: str, center: bool = False) -> tuple[float, float]:
     """
 
     maiden = maiden.strip().upper()
-
     N = len(maiden)
-    if not ((8 >= N >= 2) and (N % 2 == 0)):
-        raise ValueError("Maidenhead locator requires 2-8 characters, even number of characters")
+    if N < 2 or N % 2:
+        raise ValueError("Maidenhead locator requires even number of characters")
 
-    Oa = ord("A")
-    lon = -180.0
-    lat = -90.0
-    # %% first pair
-    lon += (ord(maiden[0]) - Oa) * 20
-    lat += (ord(maiden[1]) - Oa) * 10
-    # %% second pair
-    if N >= 4:
-        lon += int(maiden[2]) * 2
-        lat += int(maiden[3]) * 1
-    # %%
-    if N >= 6:
-        lon += (ord(maiden[4]) - Oa) * 5.0 / 60
-        lat += (ord(maiden[5]) - Oa) * 2.5 / 60
-    # %%
-    if N >= 8:
-        lon += int(maiden[6]) * 5.0 / 600
-        lat += int(maiden[7]) * 2.5 / 600
+    precision = N//2
 
-    # %% move lat lon to the center (if requested)
-    if center:
-        if N == 2:
-            lon += 20 / 2
-            lat += 10 / 2
-        elif N == 4:
-            lon += 2 / 2
-            lat += 1.0 / 2
-        elif N == 6:
-            lon += 5.0 / 60 / 2
-            lat += 2.5 / 60 / 2
-        elif N >= 8:
-            lon += 5.0 / 600 / 2
-            lat += 2.5 / 600 / 2
+    def cvt(x: str) -> int: return ord(x) - ord('A')
 
-    return lat, lon
+    cvts = [cvt if not (i % 2) else lambda x: int(x) for i in range(precision)]
+    weights = [24 if i % 2 else 10 for i in range(precision - 1)] + [1]
+
+    def convert(maiden: str) -> tuple[int, int]:
+        val = [c(v) for c, v in zip(cvts, maiden)]
+        if any(0 > v >= 24 for v in val):
+            raise ValueError("Locator uses A through X characters")
+        if val[0] >= 18:
+            raise ValueError("Locator uses A through R characters for the first pair")
+        return functools.reduce(lambda ac, v: ((ac[0]+v[0])*v[1], ac[1]*v[1]), list(zip(val, weights)), (0, 1))
+
+    lat_nom, lat_den = convert(maiden[1::2])
+    lon_nom, lon_den = convert(maiden[::2])
+
+    center_offset_lat = 5 if center else 0
+    center_offset_lon = 10 if center else 0
+
+    lat = (10 * (lat_nom - 9 * lat_den) + center_offset_lat) / lat_den
+    lon = (20 * (lon_nom - 9 * lon_den) + center_offset_lon) / lon_den
+
+    return (lat, lon)

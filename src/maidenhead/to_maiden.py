@@ -1,3 +1,8 @@
+import itertools
+import operator
+import functools
+
+
 def to_maiden(lat: float, lon: float = None, precision: int = 3) -> str:
     """
     Returns a maidenhead string for latitude, longitude at specified level.
@@ -19,27 +24,28 @@ def to_maiden(lat: float, lon: float = None, precision: int = 3) -> str:
         Maidenhead grid string of specified precision
     """
 
-    A = ord("A")
-    a = divmod(lon + 180, 20)
-    b = divmod(lat + 90, 10)
-    maiden = chr(A + int(a[0])) + chr(A + int(b[0]))
-    lon = a[1] / 2.0
-    lat = b[1]
-    i = 1
-    while i < precision:
-        i += 1
-        a = divmod(lon, 1)
-        b = divmod(lat, 1)
-        if not (i % 2):
-            maiden += str(int(a[0])) + str(int(b[0]))
-            lon = 24 * a[1]
-            lat = 24 * b[1]
-        else:
-            maiden += chr(A + int(a[0])) + chr(A + int(b[0]))
-            lon = 10 * a[1]
-            lat = 10 * b[1]
+    # The QTH locator encoding can be treated as a mixed radix integer number.
+    # The floating point values will be converted into integers by applying
+    # a multiplier that is chosen based on the required level of precision
+    # in order to retain accuracy.
 
-    if len(maiden) >= 6:
-        maiden = maiden[:4] + maiden[4:6].lower() + maiden[6:]
+    # Do the conversion according to radix starting from right most position
+    # returns a generaror  which produce values for each position (from least to most significant)
+    # I.e in reverse order.
+    def convert(val, radix):
+        while radix:
+            p, q = divmod(val, radix[-1])
+            base = ord("a") if len(radix) == 3 else ord("A")
+            yield str(q) if radix[-1] == 10 else chr(q + base)
+            val = p
+            radix = radix[:-1]
+
+    radix = [18] + [24 if i % 2 else 10 for i in range(precision - 1)]
+    multiplier = functools.reduce(operator.mul, radix)
+
+    int_lat = int((lat + 90) * multiplier + .5) // functools.reduce(operator.mul, radix[:2])
+    int_lon = int(((lon + 180) % 360) * (multiplier//2) + .5) // functools.reduce(operator.mul, radix[:2])
+
+    maiden = "".join(reversed(list(itertools.chain(*zip(convert(int_lat, radix), convert(int_lon, radix))))))
 
     return maiden
